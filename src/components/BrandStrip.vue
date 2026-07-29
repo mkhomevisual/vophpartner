@@ -10,8 +10,8 @@ import BrandPaths from './BrandPaths.vue'
     <div class="container-site relative">
       <p v-reveal class="overline-label">{{ t.brands.label }}</p>
 
-      <ul v-reveal="120" class="mt-9 grid grid-cols-2 overflow-hidden rounded-(--radius-card) border border-paper/8 sm:grid-cols-3 lg:mt-12 lg:grid-cols-4">
-        <li v-for="brand in BRANDS" :key="brand.name" class="brand-logo-cell">
+      <ul class="mt-9 grid grid-cols-2 overflow-hidden rounded-(--radius-card) border border-paper/8 sm:grid-cols-3 lg:mt-12 lg:grid-cols-4">
+        <li v-for="(brand, index) in BRANDS" :key="brand.name" v-reveal="80 + index * 55" class="brand-logo-cell">
           <img
             :src="brand.src"
             :alt="brand.name"

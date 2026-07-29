@@ -27,7 +27,7 @@ usePointerGlow(grid)
         <p v-reveal="180" class="text-lead mt-6">{{ t.contact.body }}</p>
       </div>
 
-      <div ref="grid" class="mx-auto mt-14 grid max-w-4xl gap-5 md:mt-18 md:grid-cols-3">
+      <div ref="grid" class="mx-auto mt-14 grid max-w-2xl gap-5 md:mt-18 md:grid-cols-2">
         <a
           v-for="(card, i) in t.contact.cards"
           :key="card.label"

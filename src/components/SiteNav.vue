@@ -1,7 +1,6 @@
 <script setup>
 import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
 import { t, lang, setLang, LANGUAGES } from '../i18n.js'
-import { theme, toggleTheme } from '../theme.js'
 import { useScrollProgress } from '../motion.js'
 import BrandMark from './BrandMark.vue'
 import UiIcon from './UiIcon.vue'
@@ -100,16 +99,6 @@ onBeforeUnmount(() => {
           </select>
           <UiIcon name="chevron-down" class="pointer-events-none absolute top-1/2 right-2.5 size-3.5 -translate-y-1/2 text-paper-faint" />
         </label>
-
-        <!-- Theme toggle -->
-        <button
-          type="button"
-          class="grid size-10 flex-none place-items-center rounded-full border border-paper/12 text-paper-dim transition-colors duration-250 hover:border-paper/30 hover:text-paper"
-          :aria-label="theme === 'dark' ? t.a11y.themeToLight : t.a11y.themeToDark"
-          @click="toggleTheme"
-        >
-          <UiIcon :name="theme === 'dark' ? 'sun' : 'moon'" class="size-4.5" />
-        </button>
 
         <a href="#contact" class="btn btn-primary hidden px-5! py-2.5! md:inline-flex">
           {{ t.nav.cta }}
