@@ -1,0 +1,38 @@
+# File Manifest
+
+- `.claude/skills/voph-asset-direction/SKILL.md`
+- `.claude/skills/voph-copywriter/SKILL.md`
+- `.claude/skills/voph-design-system/SKILL.md`
+- `.claude/skills/voph-frontend-design/SKILL.md`
+- `.claude/skills/voph-motion-interactions/SKILL.md`
+- `.claude/skills/voph-project-guardian/SKILL.md`
+- `.claude/skills/voph-qa-review/SKILL.md`
+- `.claude/skills/voph-seo-accessibility/SKILL.md`
+- `CLAUDE.md`
+- `README.md`
+- `docs/best-claude-code-skills.md`
+- `prompts/about-us.md`
+- `prompts/contact.md`
+- `prompts/design-guidelines.md`
+- `prompts/design-review.md`
+- `prompts/frontend-design.md`
+- `prompts/hero-section.md`
+- `prompts/implementation-plan.md`
+- `prompts/master-build-prompt.md`
+- `prompts/motion-interactions.md`
+- `prompts/photography-guidelines.md`
+- `prompts/responsive-qa.md`
+- `prompts/seo-accessibility.md`
+- `prompts/services.md`
+- `prompts/start-here.md`
+- `prompts/why-voph.md`
+- `references/VOPH Partners - original brief.docx`
+- `references/voph-project-brief.md`
+- `skills-visible-copy/voph-asset-direction/SKILL.md`
+- `skills-visible-copy/voph-copywriter/SKILL.md`
+- `skills-visible-copy/voph-design-system/SKILL.md`
+- `skills-visible-copy/voph-frontend-design/SKILL.md`
+- `skills-visible-copy/voph-motion-interactions/SKILL.md`
+- `skills-visible-copy/voph-project-guardian/SKILL.md`
+- `skills-visible-copy/voph-qa-review/SKILL.md`
+- `skills-visible-copy/voph-seo-accessibility/SKILL.md`
