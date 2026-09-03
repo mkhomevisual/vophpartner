@@ -173,6 +173,10 @@ if (fallback404) {
     if (!fallback404.includes(`data-locale="${locale}"`) || !fallback404.includes(`<h1>${message.heading}</h1>`)) {
       fail(`${locale.toUpperCase()}: root 404 fallback is missing localized copy`)
     }
+    const expectedHomeHref = locale === 'cs' ? '/' : `/${locale}/`
+    if (!fallback404.includes(`<a class="action" href="${expectedHomeHref}">`)) {
+      fail(`${locale.toUpperCase()}: root 404 fallback has an invalid home URL`)
+    }
   }
   if (!fallback404.includes('location.pathname') || !fallback404.includes('document.documentElement.lang')) {
     fail('root 404 fallback does not select a locale from the requested URL')

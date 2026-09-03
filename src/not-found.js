@@ -26,13 +26,16 @@ export function getNotFoundMessage(locale) {
 
 export function createNotFoundPage(locale, { fallback = false } = {}) {
   const currentLocale = getLocale(locale)
-  const faviconPath = fallback ? './favicon.svg' : '../favicon.svg'
+  const faviconPath = fallback ? '/favicon.svg' : '../favicon.svg'
   const localeVariants = fallback ? LANGUAGES : LANGUAGES.filter(({ code }) => code === currentLocale)
   const content = localeVariants
     .map(({ code }) => {
       const message = messages[code]
       const isActive = code === currentLocale
-      const homeHref = fallback ? (code === 'cs' ? './' : `./${code}/`) : './'
+      // GitHub Pages serves this root 404 document at the originally requested
+      // URL. Use root-relative targets so a deep invalid URL cannot duplicate
+      // its locale segment (for example /de/de/de/).
+      const homeHref = fallback ? (code === 'cs' ? '/' : `/${code}/`) : './'
       return `<main class="page" data-locale="${code}" data-title="${escapeHtml(message.title)}"${isActive ? '' : ' hidden'}>
       <p class="brand">VOPH <span>Partners</span></p>
       <p class="code" aria-hidden="true">404</p>

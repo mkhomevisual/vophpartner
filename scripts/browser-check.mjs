@@ -86,7 +86,7 @@ const openNotFound = async (locale) => {
   }))
   assert(result.lang === locale, `${locale}: incorrect localized 404 lang`)
   assert(result.title === expected.title && result.heading === expected.heading, `${locale}: incorrect localized 404 copy`)
-  assert(result.homeHref === './', `${locale}: localized 404 home link must stay within its locale`)
+  assert(result.homeHref === (locale === 'cs' ? '/' : './'), `${locale}: localized 404 home link is incorrect`)
   assert(!result.dark, `${locale}: 404 must use the light theme`)
   await context.close()
 }
@@ -94,7 +94,7 @@ const openNotFound = async (locale) => {
 const openFallbackNotFound = async (locale) => {
   const context = await browser.newContext()
   const page = await context.newPage()
-  const path = locale === 'cs' ? '/missing-page' : `/${locale}/missing-page`
+  const path = locale === 'cs' ? '/missing/page' : `/${locale}/missing/page`
   await page.route(`${baseUrl}${path}`, (route) => route.fulfill({ status: 404, contentType: 'text/html', body: fallback404 }))
   const response = await page.goto(`${baseUrl}${path}`, { waitUntil: 'domcontentloaded' })
   assert(response?.status() === 404, `${locale}: fallback 404 must retain an HTTP 404 status`)
@@ -103,8 +103,10 @@ const openFallbackNotFound = async (locale) => {
     lang: document.documentElement.lang,
     title: document.title,
     heading: document.querySelector('main:not([hidden]) h1')?.textContent?.trim(),
+    homeHref: document.querySelector('main:not([hidden]) .action')?.href,
   }))
   assert(result.lang === locale && result.title === expected.title && result.heading === expected.heading, `${locale}: root fallback 404 did not select the requested locale`)
+  assert(result.homeHref === `${baseUrl}${locale === 'cs' ? '/' : `/${locale}/`}`, `${locale}: root fallback 404 must link directly to its locale home`)
   await context.close()
 }
 
