@@ -2,14 +2,12 @@
 import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
 import { t, lang, navigateToLocale, LANGUAGES } from '../i18n.js'
 import { useScrollProgress } from '../motion.js'
-import { theme, toggleTheme } from '../theme.js'
 import BrandMark from './BrandMark.vue'
 import UiIcon from './UiIcon.vue'
 
 const scrolled = ref(false)
 const menuOpen = ref(false)
 const activeId = ref('')
-const isMounted = ref(false)
 const progress = useScrollProgress()
 
 let sectionObserver = null
@@ -31,7 +29,6 @@ watch(menuOpen, (open) => {
 })
 
 onMounted(() => {
-  isMounted.value = true
   onScroll()
   window.addEventListener('scroll', onScroll, { passive: true })
   window.addEventListener('keydown', onKeydown)
@@ -106,16 +103,6 @@ onBeforeUnmount(() => {
         <a href="#contact" class="btn btn-primary hidden px-5! py-2.5! md:inline-flex">
           {{ t.nav.cta }}
         </a>
-
-        <button
-          v-if="isMounted"
-          type="button"
-          class="grid size-10 place-items-center rounded-full border border-paper/12 text-paper transition-colors duration-250 hover:border-paper/30"
-          :aria-label="theme === 'dark' ? t.a11y.themeToLight : t.a11y.themeToDark"
-          @click="toggleTheme"
-        >
-          <UiIcon :name="theme === 'dark' ? 'sun' : 'moon'" class="size-4.5" />
-        </button>
 
         <!-- Mobile menu button -->
         <button

@@ -4,6 +4,7 @@ import { dirname, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { renderToString } from '@vue/server-renderer'
 import { createSeoHead } from '../src/seo.js'
+import { createNotFoundPage } from '../src/not-found.js'
 
 const root = process.cwd()
 const distDir = resolve(root, 'dist')
@@ -52,7 +53,16 @@ try {
       : resolve(distDir, locale, 'index.html')
     mkdirSync(dirname(destination), { recursive: true })
     writeFileSync(destination, page)
+
+    const notFoundDestination = locale === 'cs'
+      ? resolve(distDir, '404.html')
+      : resolve(distDir, locale, '404.html')
+    writeFileSync(notFoundDestination, createNotFoundPage(locale))
   }
+
+  // GitHub Pages serves the root-level file for unknown URLs. It detects a
+  // locale prefix in the requested path and presents the matching translation.
+  writeFileSync(resolve(distDir, '404.html'), createNotFoundPage('cs', { fallback: true }))
 } finally {
   rmSync(serverDir, { recursive: true, force: true })
 }

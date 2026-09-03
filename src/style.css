@@ -2,11 +2,8 @@
 
 /* ============================================================
    VOPH Partners — design tokens
-   Semantic roles, themeable: `ink-*` = surfaces, `paper-*` = text.
-   LIGHT is the default theme (client requirement); `.dark` on
-   <html> restores the original dark palette. `ember-500` stays
-   identical in both themes (brand graphics, buttons, routes);
-   ember-400/600 adapt for contrast on each background.
+   Semantic roles: `ink-*` = surfaces, `paper-*` = text.
+   The light palette is fixed across the entire site.
    ============================================================ */
 
 @theme {
@@ -14,19 +11,19 @@
   --font-display: 'Space Grotesk Variable', 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
   --font-sans: 'Inter Variable', 'Inter', ui-sans-serif, system-ui, sans-serif;
 
-  /* Surfaces — warm paper-white ramp (light theme) */
+  /* Surfaces — warm paper-white ramp */
   --color-ink-950: #f6f3ee;
   --color-ink-900: #fdfcfa;
   --color-ink-850: #ffffff;
   --color-ink-800: #eee9e1;
   --color-ink-700: #e0d9cd;
 
-  /* Text — warm near-black ramp (light theme) */
+  /* Text — warm near-black ramp */
   --color-paper: #16130f;
   --color-paper-dim: #4f4940;
   --color-paper-faint: #6e675e;
 
-  /* Accent — ember orange ramp (light theme) */
+  /* Accent — ember orange ramp */
   --color-ember-300: #ffb27d;
   --color-ember-400: #d85a04;
   --color-ember-500: #ff7a26;
@@ -40,30 +37,8 @@
   --ease-out-soft: cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
-/* Dark theme — the original palette, via toggle */
-.dark {
-  --color-ink-950: #0a0908;
-  --color-ink-900: #100e0c;
-  --color-ink-850: #16130f;
-  --color-ink-800: #1c1813;
-  --color-ink-700: #2b251e;
-
-  --color-paper: #f7f5f1;
-  --color-paper-dim: #b8b1a6;
-  --color-paper-faint: #8a8277;
-
-  --color-ember-300: #ffc49b;
-  --color-ember-400: #ff9d57;
-  --color-ember-500: #ff7a26;
-  --color-ember-600: #ee5f07;
-  --color-ember-700: #c04d06;
-}
-
 :root {
   color-scheme: light;
-}
-.dark {
-  color-scheme: dark;
 }
 
 /* ============================================================
@@ -213,8 +188,8 @@ body::after {
     @apply border-paper/16;
     transform: translateY(-3px);
   }
-  /* light theme: soft lift so near-white cards read against the page */
-  html:not(.dark) .card {
+  /* Soft lift so near-white cards read against the page. */
+  .card {
     box-shadow:
       0 1px 2px rgb(22 19 15 / 0.04),
       0 10px 28px -14px rgb(22 19 15 / 0.1);
@@ -276,14 +251,6 @@ body::after {
     opacity: 1;
     transform: scale(1.04);
   }
-  .dark .brand-logo {
-    mix-blend-mode: screen;
-    filter: grayscale(1) brightness(0) invert(1);
-  }
-  .dark .brand-logo-cell:hover .brand-logo {
-    filter: grayscale(0) brightness(1) invert(0);
-  }
-
   /* ============================================================
      Reveal on scroll (paired with v-reveal directive)
      ============================================================ */

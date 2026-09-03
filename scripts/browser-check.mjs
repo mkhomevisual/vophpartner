@@ -1,10 +1,14 @@
 import { chromium } from 'playwright-core'
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 import { getDictionary, LANGUAGES } from '../src/i18n.js'
+import { getNotFoundMessage } from '../src/not-found.js'
 
 const baseUrl = (process.env.URL ?? 'http://127.0.0.1:4173').replace(/\/$/, '')
 const executablePath = `${process.env.HOME}/Library/Caches/ms-playwright/chromium_headless_shell-1223/chrome-headless-shell-mac-arm64/chrome-headless-shell`
 const localePaths = Object.fromEntries(LANGUAGES.map(({ code }) => [code, code === 'cs' ? '/' : `/${code}/`]))
 const browserErrors = []
+const fallback404 = readFileSync(resolve(process.cwd(), 'dist/404.html'), 'utf8')
 
 const assert = (condition, message) => {
   if (!condition) throw new Error(message)
@@ -27,7 +31,10 @@ const attachErrorTracking = (page) => {
 
 const openLocale = async (locale, options = {}) => {
   const context = await browser.newContext(options)
-  await context.addInitScript((storedLocale) => localStorage.setItem('voph-lang', storedLocale), locale === 'cs' ? 'en' : 'cs')
+  await context.addInitScript((storedLocale) => {
+    localStorage.setItem('voph-lang', storedLocale)
+    localStorage.setItem('voph-theme', 'dark')
+  }, locale === 'cs' ? 'en' : 'cs')
   const page = await context.newPage()
   attachErrorTracking(page)
   const response = await page.goto(`${baseUrl}${localePaths[locale]}`, { waitUntil: 'domcontentloaded' })
@@ -42,6 +49,9 @@ const openLocale = async (locale, options = {}) => {
     appText: document.querySelector('#app')?.textContent?.trim().length ?? 0,
     reveals: document.querySelectorAll('.reveal').length,
     widthFits: document.documentElement.scrollWidth <= window.innerWidth + 1,
+    dark: document.documentElement.classList.contains('dark'),
+    storedTheme: localStorage.getItem('voph-theme'),
+    themeControl: [...document.querySelectorAll('button')].some((button) => /dark|light|tmav|světl|tryb|modus/i.test(button.getAttribute('aria-label') ?? '')),
   }))
   assert(result.lang === locale, `${locale}: URL did not control html lang`)
   assert(result.title === expected.meta.title, `${locale}: incorrect localized title after hydration`)
@@ -49,6 +59,7 @@ const openLocale = async (locale, options = {}) => {
   assert(result.appText > 200, `${locale}: page rendered blank`)
   assert(result.reveals > 0, `${locale}: reveal interactions did not initialize`)
   assert(result.widthFits, `${locale}: horizontal overflow at ${options.viewport?.width ?? 1280}px`)
+  assert(!result.dark && result.storedTheme === null && !result.themeControl, `${locale}: the light-only theme must not expose a theme switch`)
 
   const refreshed = await page.reload({ waitUntil: 'domcontentloaded' })
   assert(refreshed?.status() === 200, `${locale}: refresh did not return HTTP 200`)
@@ -58,10 +69,51 @@ const openLocale = async (locale, options = {}) => {
   await context.close()
 }
 
+const openNotFound = async (locale) => {
+  const context = await browser.newContext()
+  const page = await context.newPage()
+  attachErrorTracking(page)
+  const path = locale === 'cs' ? '/404.html' : `/${locale}/404.html`
+  const response = await page.goto(`${baseUrl}${path}`, { waitUntil: 'domcontentloaded' })
+  assert(response?.status() === 200, `${locale}: localized 404 page is missing`)
+  const expected = getNotFoundMessage(locale)
+  const result = await page.evaluate(() => ({
+    lang: document.documentElement.lang,
+    title: document.title,
+    heading: document.querySelector('h1')?.textContent?.trim(),
+    homeHref: document.querySelector('.action')?.getAttribute('href'),
+    dark: document.documentElement.classList.contains('dark'),
+  }))
+  assert(result.lang === locale, `${locale}: incorrect localized 404 lang`)
+  assert(result.title === expected.title && result.heading === expected.heading, `${locale}: incorrect localized 404 copy`)
+  assert(result.homeHref === './', `${locale}: localized 404 home link must stay within its locale`)
+  assert(!result.dark, `${locale}: 404 must use the light theme`)
+  await context.close()
+}
+
+const openFallbackNotFound = async (locale) => {
+  const context = await browser.newContext()
+  const page = await context.newPage()
+  const path = locale === 'cs' ? '/missing-page' : `/${locale}/missing-page`
+  await page.route(`${baseUrl}${path}`, (route) => route.fulfill({ status: 404, contentType: 'text/html', body: fallback404 }))
+  const response = await page.goto(`${baseUrl}${path}`, { waitUntil: 'domcontentloaded' })
+  assert(response?.status() === 404, `${locale}: fallback 404 must retain an HTTP 404 status`)
+  const expected = getNotFoundMessage(locale)
+  const result = await page.evaluate(() => ({
+    lang: document.documentElement.lang,
+    title: document.title,
+    heading: document.querySelector('main:not([hidden]) h1')?.textContent?.trim(),
+  }))
+  assert(result.lang === locale && result.title === expected.title && result.heading === expected.heading, `${locale}: root fallback 404 did not select the requested locale`)
+  await context.close()
+}
+
 const browser = await chromium.launch({ executablePath })
 
 try {
   for (const { code } of LANGUAGES) await openLocale(code)
+  for (const { code } of LANGUAGES) await openNotFound(code)
+  for (const { code } of LANGUAGES) await openFallbackNotFound(code)
 
   await openLocale('fr', { viewport: { width: 360, height: 780 }, deviceScaleFactor: 1 })
 
@@ -74,13 +126,6 @@ try {
   assert(await interactionPage.locator('html').getAttribute('lang') === 'de', 'Language selector did not navigate to /de/#services')
 
   await interactionPage.goto(`${baseUrl}/`, { waitUntil: 'domcontentloaded' })
-  await interactionPage.getByRole('button', { name: /tmavý/i }).click()
-  const theme = await interactionPage.evaluate(() => ({
-    dark: document.documentElement.classList.contains('dark'),
-    stored: localStorage.getItem('voph-theme'),
-  }))
-  assert(theme.dark && theme.stored === 'dark', 'Theme switch did not activate dark mode')
-
   await interactionPage.locator('a[href="#about"]').first().click()
   await interactionPage.waitForFunction(() => window.location.hash === '#about')
   await interactionContext.close()
@@ -106,7 +151,7 @@ try {
   await reducedMotionContext.close()
 
   if (browserErrors.length) throw new Error(browserErrors.join('\n'))
-  console.log(`Browser check passed for ${LANGUAGES.length} locale URLs, selector, theme, hash navigation and reduced motion.`)
+  console.log(`Browser check passed for ${LANGUAGES.length} locale URLs, localized 404 pages, selector, light-only theme, hash navigation and reduced motion.`)
 } finally {
   await browser.close()
 }

@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { getDictionary, LANGUAGES, LOCALE_PATHS } from '../src/i18n.js'
+import { getNotFoundMessage } from '../src/not-found.js'
 import { SITE_ORIGIN } from '../src/seo.js'
 
 const root = process.cwd()
@@ -165,6 +166,19 @@ for (const locale of localeCodes) {
   }
 }
 
+const fallback404 = requireFile(resolve(dist, '404.html'))
+if (fallback404) {
+  for (const locale of localeCodes) {
+    const message = getNotFoundMessage(locale)
+    if (!fallback404.includes(`data-locale="${locale}"`) || !fallback404.includes(`<h1>${message.heading}</h1>`)) {
+      fail(`${locale.toUpperCase()}: root 404 fallback is missing localized copy`)
+    }
+  }
+  if (!fallback404.includes('location.pathname') || !fallback404.includes('document.documentElement.lang')) {
+    fail('root 404 fallback does not select a locale from the requested URL')
+  }
+}
+
 const robots = requireFile(resolve(dist, 'robots.txt'))
 if (robots && (!robots.includes('User-agent: *') || !robots.includes('Allow: /') || !robots.includes(`Sitemap: ${SITE_ORIGIN}/sitemap.xml`))) {
   fail('robots.txt is not index-friendly or has the wrong sitemap URL')
@@ -175,6 +189,17 @@ if (sitemap) {
   for (const locale of localeCodes) {
     if (!sitemap.includes(`<loc>${localeUrl(locale)}</loc>`)) fail(`sitemap.xml is missing ${localeUrl(locale)}`)
   }
+}
+
+for (const locale of localeCodes) {
+  const notFoundPath = resolve(dist, locale === 'cs' ? '404.html' : locale, locale === 'cs' ? '' : '404.html')
+  const html = requireFile(notFoundPath)
+  if (!html) continue
+  const message = getNotFoundMessage(locale)
+  if (html.match(/<html\s+lang="([^"]+)"/i)?.[1] !== locale) fail(`${locale.toUpperCase()}: localized 404 has incorrect html lang`)
+  if (stripTags(html.match(/<title>([\s\S]*?)<\/title>/i)?.[1]) !== message.title) fail(`${locale.toUpperCase()}: localized 404 has incorrect title`)
+  if (stripTags(html.match(/<h1>([\s\S]*?)<\/h1>/i)?.[1]) !== message.heading) fail(`${locale.toUpperCase()}: localized 404 has incorrect heading`)
+  if (!/<meta\b[^>]*\bname="robots"[^>]*\bcontent="noindex, follow"/i.test(html)) fail(`${locale.toUpperCase()}: localized 404 must not be indexed`)
 }
 
 const ogPath = resolve(dist, 'og.png')
