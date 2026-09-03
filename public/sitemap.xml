@@ -1,6 +1,80 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://partners.voph.cz/</loc>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://partners.voph.cz/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://partners.voph.cz/en/" />
+    <xhtml:link rel="alternate" hreflang="pl" href="https://partners.voph.cz/pl/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://partners.voph.cz/de/" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://partners.voph.cz/hu/" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://partners.voph.cz/fr/" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://partners.voph.cz/nl/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://partners.voph.cz/" />
+  </url>
+  <url>
+    <loc>https://partners.voph.cz/en/</loc>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://partners.voph.cz/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://partners.voph.cz/en/" />
+    <xhtml:link rel="alternate" hreflang="pl" href="https://partners.voph.cz/pl/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://partners.voph.cz/de/" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://partners.voph.cz/hu/" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://partners.voph.cz/fr/" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://partners.voph.cz/nl/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://partners.voph.cz/" />
+  </url>
+  <url>
+    <loc>https://partners.voph.cz/pl/</loc>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://partners.voph.cz/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://partners.voph.cz/en/" />
+    <xhtml:link rel="alternate" hreflang="pl" href="https://partners.voph.cz/pl/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://partners.voph.cz/de/" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://partners.voph.cz/hu/" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://partners.voph.cz/fr/" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://partners.voph.cz/nl/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://partners.voph.cz/" />
+  </url>
+  <url>
+    <loc>https://partners.voph.cz/de/</loc>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://partners.voph.cz/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://partners.voph.cz/en/" />
+    <xhtml:link rel="alternate" hreflang="pl" href="https://partners.voph.cz/pl/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://partners.voph.cz/de/" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://partners.voph.cz/hu/" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://partners.voph.cz/fr/" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://partners.voph.cz/nl/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://partners.voph.cz/" />
+  </url>
+  <url>
+    <loc>https://partners.voph.cz/hu/</loc>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://partners.voph.cz/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://partners.voph.cz/en/" />
+    <xhtml:link rel="alternate" hreflang="pl" href="https://partners.voph.cz/pl/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://partners.voph.cz/de/" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://partners.voph.cz/hu/" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://partners.voph.cz/fr/" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://partners.voph.cz/nl/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://partners.voph.cz/" />
+  </url>
+  <url>
+    <loc>https://partners.voph.cz/fr/</loc>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://partners.voph.cz/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://partners.voph.cz/en/" />
+    <xhtml:link rel="alternate" hreflang="pl" href="https://partners.voph.cz/pl/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://partners.voph.cz/de/" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://partners.voph.cz/hu/" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://partners.voph.cz/fr/" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://partners.voph.cz/nl/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://partners.voph.cz/" />
+  </url>
+  <url>
+    <loc>https://partners.voph.cz/nl/</loc>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://partners.voph.cz/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://partners.voph.cz/en/" />
+    <xhtml:link rel="alternate" hreflang="pl" href="https://partners.voph.cz/pl/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://partners.voph.cz/de/" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://partners.voph.cz/hu/" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://partners.voph.cz/fr/" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://partners.voph.cz/nl/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://partners.voph.cz/" />
   </url>
 </urlset>

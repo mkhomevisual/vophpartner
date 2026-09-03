@@ -37,11 +37,9 @@ for (const vp of viewports) {
   await page.close()
 }
 
-// EN variant, desktop hero only
+// EN variant, desktop hero only — test the actual static locale route.
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 } })
-await page.goto(BASE, { waitUntil: 'networkidle' })
-await page.evaluate(() => localStorage.setItem('voph-lang', 'en'))
-await page.reload({ waitUntil: 'networkidle' })
+await page.goto(`${BASE.replace(/\/$/, '')}/en/`, { waitUntil: 'networkidle' })
 await page.waitForTimeout(1600)
 await page.screenshot({ path: `${OUT}/desktop-1440-hero-en.png` })
 await page.close()

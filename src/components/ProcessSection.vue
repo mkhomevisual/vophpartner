@@ -7,7 +7,7 @@ import SectionHead from './SectionHead.vue'
 const sectionEl = ref(null)
 const stepsEl = ref(null)
 const flow = useSectionFlow(stepsEl)
-const activeCount = ref(prefersReducedMotion() ? 4 : 0)
+const activeCount = ref(0)
 
 /* The reading sequence plays once as this section enters the viewport.
    The route itself remains independently scroll-driven. */
@@ -24,7 +24,11 @@ const startSequence = () => {
 }
 
 onMounted(() => {
-  if (!sectionEl.value || prefersReducedMotion()) return
+  if (prefersReducedMotion()) {
+    activeCount.value = 4
+    return
+  }
+  if (!sectionEl.value) return
   revealObserver = new IntersectionObserver(
     ([entry]) => {
       if (!entry.isIntersecting) return

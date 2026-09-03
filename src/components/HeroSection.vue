@@ -56,7 +56,7 @@ const magnetic = useMagnetic()
           class="line-mask"
         >
           <span :style="{ '--rise-delay': `${120 + i * 130}ms` }">
-            {{ line }}<template v-if="i === t.hero.titleLines.length - 1"><span class="text-ember-500">.</span></template>
+            {{ line }}<template v-if="i < t.hero.titleLines.length - 1"><span class="sr-only">&nbsp;</span></template><template v-if="i === t.hero.titleLines.length - 1"><span class="text-ember-500">.</span></template>
           </span>
         </span>
       </h1>

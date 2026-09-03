@@ -1,9 +1,16 @@
 <script setup>
+import { onMounted, ref } from 'vue'
 import { prefersReducedMotion } from '../motion.js'
 
 /* Decorative supply paths, inspired by the requested reference.
    They stay behind the brand grid and are omitted for reduced motion. */
-const animate = !prefersReducedMotion()
+// Start deterministically for SSR hydration, then respect the visitor's
+// preference after mounting in the browser.
+const animate = ref(true)
+
+onMounted(() => {
+  animate.value = !prefersReducedMotion()
+})
 
 const paths = [
   'M-80 640 C 150 520, 230 860, 435 620 S 690 300, 920 510 S 1190 860, 1520 570',

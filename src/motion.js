@@ -59,7 +59,13 @@ export const vReveal = {
    ------------------------------------------------------------ */
 
 export function useCounter(target, { duration = 1100, decimals = 0 } = {}) {
-  const display = ref(0)
+  // Static HTML must contain the factual value. The client starts from the
+  // same value while hydrating, then restores the existing count-up behaviour
+  // when the statistic enters the viewport.
+  const startsPrerendered =
+    typeof window === 'undefined' ||
+    document.querySelector('#app[data-prerendered="true"]') !== null
+  const display = ref(startsPrerendered ? target : 0)
   const el = ref(null)
 
   onMounted(() => {
@@ -67,6 +73,8 @@ export function useCounter(target, { duration = 1100, decimals = 0 } = {}) {
       display.value = target
       return
     }
+
+    if (startsPrerendered) display.value = 0
     const watcher = new IntersectionObserver(
       (entries) => {
         if (!entries[0].isIntersecting) return

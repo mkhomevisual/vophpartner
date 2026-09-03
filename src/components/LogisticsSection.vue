@@ -1,11 +1,16 @@
 <script setup>
+import { onMounted, ref } from 'vue'
 import { t } from '../i18n.js'
 import { prefersReducedMotion } from '../motion.js'
 
 /* Supply-flow diagram: Brands → VOPH Partners → Markets.
    Desktop: SVG connector layer + SMIL cargo dots in a fixed-ratio
    canvas so everything scales uniformly. Mobile: vertical stack. */
-const animate = !prefersReducedMotion()
+const animate = ref(true)
+
+onMounted(() => {
+  animate.value = !prefersReducedMotion()
+})
 
 const lanes = [
   { id: 'lane-in', d: 'M150 150 H 250', dur: '3.2s', begin: '0s' },

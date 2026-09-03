@@ -1,4 +1,4 @@
-import { computed, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 
 /* ============================================================
    VOPH Partners — all visitor-facing copy lives here.
@@ -14,6 +14,18 @@ export const LANGUAGES = [
   { code: 'fr', short: 'FR', name: 'Français' },
   { code: 'nl', short: 'NL', name: 'Nederlands' },
 ]
+
+// Czech is intentionally served from the root. Every other language has a
+// dedicated directory so its URL is the source of truth for the locale.
+export const LOCALE_PATHS = Object.freeze({
+  cs: '/',
+  en: '/en/',
+  pl: '/pl/',
+  de: '/de/',
+  hu: '/hu/',
+  fr: '/fr/',
+  nl: '/nl/',
+})
 
 export const BRANDS = [
   ['Always', '/brands/Always_logo.png'],
@@ -48,7 +60,7 @@ export const BRANDS = [
   ['Vaseline', '/brands/Vaseline_new_logo.png'],
   ['Veet', '/brands/Veet-Logo.png'],
   ['Zewa', '/brands/zewa-300x300.avif'],
-].map(([name, src]) => ({ name, src: src.replace('/', import.meta.env.BASE_URL) }))
+].map(([name, src]) => ({ name, src: src.replace(/^\//, '') }))
 
 export const CONTACT = {
   phone: '+420 775 372 979',
@@ -91,8 +103,8 @@ const createDictionary = (data) => ({
 const dictionaries = {
   cs: createDictionary({
     meta: {
-      title: 'VOPH Partners — FMCG trading & sourcing',
-      description: 'FMCG trading a sourcing s dlouhodobou perspektivou. Globální značky, logistika a trhy po celé Evropě.',
+      title: 'FMCG trading, sourcing a distribuce | VOPH Partners',
+      description: 'B2B FMCG trading, sourcing a distribuce globálních značek pro velkoobchod, retail a e-shopy napříč evropskými trhy. Spolehlivá logistika od VOPH Partners.',
     },
     a11y: { skip: 'Přeskočit na obsah', menuOpen: 'Otevřít menu', menuClose: 'Zavřít menu', langLabel: 'Jazyk webu', home: 'VOPH Partners — úvod', themeToDark: 'Přepnout na tmavý režim', themeToLight: 'Přepnout na světlý režim' },
     nav: { links: [['about', 'O nás'], ['services', 'Služby'], ['why', 'Proč VOPH'], ['process', 'Spolupráce'], ['contact', 'Kontakt']].map(([id, label]) => ({ id, label })), cta: 'Kontaktovat nás' },
@@ -114,7 +126,7 @@ const dictionaries = {
     footer: { tagline: 'Dlouhodobý partner pro FMCG trading a sourcing.', navLabel: 'Navigace', contactLabel: 'Kontakt', address: CONTACT.address, rights: 'Všechna práva vyhrazena.' },
   }),
   en: createDictionary({
-    meta: { title: 'VOPH Partners — FMCG Trading & Sourcing', description: 'FMCG trading and sourcing for the long term. Brands, logistics and markets across Europe.' },
+    meta: { title: 'FMCG Trading, Sourcing & Distribution | VOPH Partners', description: 'B2B FMCG trading, sourcing and distribution of global brands for wholesalers, retailers and e-commerce across European markets, backed by reliable logistics.' },
     a11y: { skip: 'Skip to content', menuOpen: 'Open menu', menuClose: 'Close menu', langLabel: 'Site language', home: 'VOPH Partners — home', themeToDark: 'Switch to dark mode', themeToLight: 'Switch to light mode' },
     nav: { links: [['about', 'About'], ['services', 'Services'], ['why', 'Why VOPH'], ['process', 'Partnership'], ['contact', 'Contact']].map(([id, label]) => ({ id, label })), cta: 'Contact us' },
     hero: { badge: 'FMCG trading & sourcing', titleLines: ['Your long-term', 'partner for FMCG', 'trading & sourcing'], sub: 'Global brands. Competitive prices. Long-term partnerships.', support: 'We connect brands, logistics and markets — for wholesalers, retail chains and major e-commerce players.', ctaPrimary: 'Contact us', ctaSecondary: 'Learn more', chips: ['Sourcing in Europe & beyond', 'One point of contact', 'Fast response'], scroll: 'Scroll down' },
@@ -129,7 +141,7 @@ const dictionaries = {
     footer: { tagline: 'Long-term partner for FMCG trading and sourcing.', navLabel: 'Navigation', contactLabel: 'Contact', address: CONTACT.address, rights: 'All rights reserved.' },
   }),
   pl: createDictionary({
-    meta: { title: 'VOPH Partners — handel i sourcing FMCG', description: 'Długoterminowy handel i sourcing FMCG. Marki, logistyka i rynki w całej Europie.' },
+    meta: { title: 'Handel, sourcing i dystrybucja FMCG | VOPH Partners', description: 'B2B handel, sourcing i dystrybucja FMCG globalnych marek dla hurtowni, sieci handlowych i e-commerce na rynkach europejskich, ze sprawną logistyką.' },
     a11y: { skip: 'Przejdź do treści', menuOpen: 'Otwórz menu', menuClose: 'Zamknij menu', langLabel: 'Język strony', home: 'VOPH Partners — strona główna', themeToDark: 'Przełącz na tryb ciemny', themeToLight: 'Przełącz na tryb jasny' },
     nav: { links: [['about', 'O nas'], ['services', 'Usługi'], ['why', 'Dlaczego VOPH'], ['process', 'Współpraca'], ['contact', 'Kontakt']].map(([id, label]) => ({ id, label })), cta: 'Skontaktuj się z nami' },
     hero: { badge: 'FMCG trading & sourcing', titleLines: ['Twój długoterminowy', 'partner w handlu', 'i sourcingu FMCG'], sub: 'Globalne marki. Konkurencyjne ceny. Długoterminowe partnerstwa.', support: 'Łączymy marki, logistykę i rynki — dla hurtowni, sieci detalicznych i dużych e-commerce.', ctaPrimary: 'Skontaktuj się z nami', ctaSecondary: 'Dowiedz się więcej', chips: ['Sourcing w Europie i poza nią', 'Jeden punkt kontaktu', 'Szybka odpowiedź'], scroll: 'Przewiń w dół' },
@@ -144,7 +156,7 @@ const dictionaries = {
     footer: { tagline: 'Długoterminowy partner w handlu i sourcingu FMCG.', navLabel: 'Nawigacja', contactLabel: 'Kontakt', address: CONTACT.address, rights: 'Wszelkie prawa zastrzeżone.' },
   }),
   de: createDictionary({
-    meta: { title: 'VOPH Partners — FMCG-Handel & Sourcing', description: 'Langfristiger FMCG-Handel und Sourcing. Marken, Logistik und Märkte in ganz Europa.' },
+    meta: { title: 'FMCG-Handel, Sourcing & Distribution | VOPH Partners', description: 'B2B-FMCG-Handel, Sourcing und Distribution globaler Marken für Großhandel, Einzelhandel und E-Commerce in europäischen Märkten – mit zuverlässiger Logistik.' },
     a11y: { skip: 'Zum Inhalt springen', menuOpen: 'Menü öffnen', menuClose: 'Menü schließen', langLabel: 'Sprache der Website', home: 'VOPH Partners — Startseite', themeToDark: 'Zum dunklen Modus wechseln', themeToLight: 'Zum hellen Modus wechseln' },
     nav: { links: [['about', 'Über uns'], ['services', 'Leistungen'], ['why', 'Warum VOPH'], ['process', 'Zusammenarbeit'], ['contact', 'Kontakt']].map(([id, label]) => ({ id, label })), cta: 'Kontakt aufnehmen' },
     hero: { badge: 'FMCG trading & sourcing', titleLines: ['Ihr langfristiger', 'Partner für FMCG-', 'Handel & Sourcing'], sub: 'Globale Marken. Wettbewerbsfähige Preise. Langfristige Partnerschaften.', support: 'Wir verbinden Marken, Logistik und Märkte — für Großhändler, Handelsketten und große E-Commerce-Unternehmen.', ctaPrimary: 'Kontakt aufnehmen', ctaSecondary: 'Mehr erfahren', chips: ['Sourcing in Europa und darüber hinaus', 'Ein Ansprechpartner', 'Schnelle Reaktion'], scroll: 'Nach unten scrollen' },
@@ -159,7 +171,7 @@ const dictionaries = {
     footer: { tagline: 'Langfristiger Partner für FMCG-Handel und Sourcing.', navLabel: 'Navigation', contactLabel: 'Kontakt', address: CONTACT.address, rights: 'Alle Rechte vorbehalten.' },
   }),
   hu: createDictionary({
-    meta: { title: 'VOPH Partners — FMCG kereskedelem és sourcing', description: 'Hosszú távú FMCG kereskedelem és sourcing. Márkák, logisztika és piacok Európa-szerte.' },
+    meta: { title: 'FMCG kereskedelem, sourcing és disztribúció | VOPH Partners', description: 'B2B FMCG kereskedelem, sourcing és globális márkák disztribúciója nagykereskedőknek, retail láncoknak és e-kereskedőknek Európa piacain, megbízható logisztikával.' },
     a11y: { skip: 'Ugrás a tartalomra', menuOpen: 'Menü megnyitása', menuClose: 'Menü bezárása', langLabel: 'Weboldal nyelve', home: 'VOPH Partners — kezdőlap', themeToDark: 'Váltás sötét módra', themeToLight: 'Váltás világos módra' },
     nav: { links: [['about', 'Rólunk'], ['services', 'Szolgáltatások'], ['why', 'Miért VOPH'], ['process', 'Együttműködés'], ['contact', 'Kapcsolat']].map(([id, label]) => ({ id, label })), cta: 'Kapcsolatfelvétel' },
     hero: { badge: 'FMCG trading & sourcing', titleLines: ['Hosszú távú', 'partnere az FMCG', 'kereskedelemben'], sub: 'Globális márkák. Versenyképes árak. Hosszú távú partnerségek.', support: 'Márkákat, logisztikát és piacokat kapcsolunk össze — nagykereskedők, üzletláncok és nagy e-kereskedők számára.', ctaPrimary: 'Kapcsolatfelvétel', ctaSecondary: 'Tudjon meg többet', chips: ['Sourcing Európában és azon túl', 'Egy kapcsolattartó', 'Gyors válasz'], scroll: 'Görgessen lejjebb' },
@@ -174,7 +186,7 @@ const dictionaries = {
     footer: { tagline: 'Hosszú távú partner FMCG kereskedelemhez és sourcinghoz.', navLabel: 'Navigáció', contactLabel: 'Kapcsolat', address: CONTACT.address, rights: 'Minden jog fenntartva.' },
   }),
   fr: createDictionary({
-    meta: { title: 'VOPH Partners — négoce et sourcing FMCG', description: 'Négoce et sourcing FMCG à long terme. Marques, logistique et marchés partout en Europe.' },
+    meta: { title: 'Négoce, sourcing et distribution FMCG | VOPH Partners', description: 'Négoce, sourcing et distribution B2B de marques FMCG mondiales pour grossistes, enseignes et e-commerce sur les marchés européens, avec une logistique fiable.' },
     a11y: { skip: 'Aller au contenu', menuOpen: 'Ouvrir le menu', menuClose: 'Fermer le menu', langLabel: 'Langue du site', home: 'VOPH Partners — accueil', themeToDark: 'Passer au mode sombre', themeToLight: 'Passer au mode clair' },
     nav: { links: [['about', 'À propos'], ['services', 'Services'], ['why', 'Pourquoi VOPH'], ['process', 'Partenariat'], ['contact', 'Contact']].map(([id, label]) => ({ id, label })), cta: 'Nous contacter' },
     hero: { badge: 'FMCG trading & sourcing', titleLines: ['Votre partenaire', 'de long terme pour', 'le FMCG'], sub: 'Marques mondiales. Prix compétitifs. Partenariats durables.', support: 'Nous connectons marques, logistique et marchés — pour les grossistes, enseignes et grands acteurs e-commerce.', ctaPrimary: 'Nous contacter', ctaSecondary: 'En savoir plus', chips: ['Sourcing en Europe et au-delà', 'Un interlocuteur unique', 'Réponse rapide'], scroll: 'Faire défiler' },
@@ -189,7 +201,7 @@ const dictionaries = {
     footer: { tagline: 'Partenaire de long terme pour le négoce et le sourcing FMCG.', navLabel: 'Navigation', contactLabel: 'Contact', address: CONTACT.address, rights: 'Tous droits réservés.' },
   }),
   nl: createDictionary({
-    meta: { title: 'VOPH Partners — FMCG-handel & sourcing', description: 'FMCG-handel en sourcing voor de lange termijn. Merken, logistiek en markten in heel Europa.' },
+    meta: { title: 'FMCG-handel, sourcing en distributie | VOPH Partners', description: 'B2B FMCG-handel, sourcing en distributie van wereldmerken voor groothandel, retail en e-commerce in Europese markten, met betrouwbare logistiek.' },
     a11y: { skip: 'Ga naar inhoud', menuOpen: 'Menu openen', menuClose: 'Menu sluiten', langLabel: 'Taal van de website', home: 'VOPH Partners — home', themeToDark: 'Naar donkere modus', themeToLight: 'Naar lichte modus' },
     nav: { links: [['about', 'Over ons'], ['services', 'Diensten'], ['why', 'Waarom VOPH'], ['process', 'Samenwerking'], ['contact', 'Contact']].map(([id, label]) => ({ id, label })), cta: 'Neem contact op' },
     hero: { badge: 'FMCG trading & sourcing', titleLines: ['Uw partner voor', 'FMCG-handel en', 'sourcing op lange termijn'], sub: 'Wereldwijde merken. Concurrerende prijzen. Langdurige partnerships.', support: 'We verbinden merken, logistiek en markten — voor groothandels, retailketens en grote e-commercepartijen.', ctaPrimary: 'Neem contact op', ctaSecondary: 'Meer informatie', chips: ['Sourcing in Europa en daarbuiten', 'Eén aanspreekpunt', 'Snelle reactie'], scroll: 'Scroll naar beneden' },
@@ -205,23 +217,42 @@ const dictionaries = {
   }),
 }
 
-const stored = typeof localStorage !== 'undefined' ? localStorage.getItem('voph-lang') : null
-export const lang = ref(LANGUAGES.some(({ code }) => code === stored) ? stored : 'cs')
-
-export function setLang(next) {
-  if (dictionaries[next]) lang.value = next
+export const getLocaleFromPath = (pathname = '') => {
+  const segments = pathname.toLowerCase().split('/').filter(Boolean)
+  return segments.find((segment) => dictionaries[segment]) ?? 'cs'
 }
+
+const initialLocale = typeof window === 'undefined' ? 'cs' : getLocaleFromPath(window.location.pathname)
+export const lang = ref(initialLocale)
 
 export const t = computed(() => dictionaries[lang.value])
 
-watch(
-  lang,
-  (value) => {
-    if (typeof document === 'undefined') return
-    localStorage.setItem('voph-lang', value)
-    document.documentElement.lang = value
-    document.title = dictionaries[value].meta.title
-    document.querySelector('meta[name="description"]')?.setAttribute('content', dictionaries[value].meta.description)
-  },
-  { immediate: true },
-)
+export function getDictionary(locale) {
+  return dictionaries[locale] ?? dictionaries.cs
+}
+
+// Used by the server entry before each prerender. It is deliberately separate
+// from visitor navigation so a URL, never localStorage, selects page content.
+export function setLocale(locale) {
+  if (dictionaries[locale]) lang.value = locale
+}
+
+export function publicAssetPath(path) {
+  const relativePath = path.replace(/^\//, '')
+  return `${lang.value === 'cs' ? './' : '../'}${relativePath}`
+}
+
+export function localeRelativePath(next) {
+  if (!dictionaries[next]) return './'
+  if (lang.value === 'cs') return next === 'cs' ? './' : `./${next}/`
+  return next === 'cs' ? '../' : `../${next}/`
+}
+
+export function navigateToLocale(next) {
+  if (!dictionaries[next] || typeof window === 'undefined') return
+
+  // Kept only as a convenience for future visits. It never controls the
+  // rendered locale: that always comes from the path above.
+  localStorage.setItem('voph-lang', next)
+  window.location.assign(`${localeRelativePath(next)}${window.location.hash}`)
+}

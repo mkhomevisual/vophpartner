@@ -9,18 +9,22 @@ motion-polished, zero runtime network requests.
 ```bash
 npm install
 npm run dev        # local dev server
-npm run build      # production build → dist/
+npm run build      # client build + static prerender → dist/
+npm run seo:check  # validate prerendered HTML and SEO metadata
 npm run preview    # serve the production build
+npm run browser:check # local preview interaction check (requires preview)
 ```
 
 ## Stack & structure
 
-- `index.html` — meta, Open Graph, JSON-LD
+- `index.html` — Vite shell with prerender placeholders
+- `src/entry-server.js` + `scripts/build.mjs` — Vue SSR entry and build-time static generation for all locales
+- `src/seo.js` — canonical locale URLs and static locale-specific metadata
 - `src/style.css` — design tokens (`@theme`) + component layer (buttons, cards, reveals, keyframes)
-- `src/i18n.js` — all CZ/EN copy in one dictionary (nothing hardcoded in components)
+- `src/i18n.js` — all seven locale dictionaries and locale URL helpers (nothing hardcoded in components)
 - `src/motion.js` — reveal directive, counters, pointer glow, magnetic CTA, scroll progress/flow
 - `src/components/` — one component per section + shared primitives (`UiIcon`, `SectionHead`, `BrandMark`)
-- `scripts/` — QA tooling (screenshots, a11y audit, OG image generator) via `playwright-core`
+- `scripts/` — build, SEO/static HTML and browser QA tooling via `playwright-core`
 - `skills-visible-copy/` — Claude Code skills used to build & maintain the project
 - `references/voph-project-brief.md` — source of truth for all content/visual decisions
 
@@ -29,7 +33,6 @@ npm run preview    # serve the production build
 Search the repo for these tokens and replace with real data:
 
 - `[MEETING_LINK]` · `[ADDRESS]`
-- `index.html`: prefix `og:image` / `twitter:image` with the production domain.
 
 ## GitHub Pages deployment
 

@@ -1,10 +1,15 @@
 <script setup>
+import { onMounted, ref } from 'vue'
 import { prefersReducedMotion } from '../motion.js'
 
 /* Abstract sourcing-route network — the hero's visual backbone.
    Pure SVG: faint meridians, trade routes, pulsing nodes and
    SMIL cargo dots (skipped entirely under reduced motion). */
-const animate = !prefersReducedMotion()
+const animate = ref(true)
+
+onMounted(() => {
+  animate.value = !prefersReducedMotion()
+})
 
 const routes = [
   { id: 'r1', d: 'M40 620 C 220 560, 330 470, 470 380 S 740 210, 880 150', dur: '13s', begin: '0s' },

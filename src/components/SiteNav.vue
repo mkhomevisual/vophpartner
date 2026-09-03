@@ -1,13 +1,15 @@
 <script setup>
 import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
-import { t, lang, setLang, LANGUAGES } from '../i18n.js'
+import { t, lang, navigateToLocale, LANGUAGES } from '../i18n.js'
 import { useScrollProgress } from '../motion.js'
+import { theme, toggleTheme } from '../theme.js'
 import BrandMark from './BrandMark.vue'
 import UiIcon from './UiIcon.vue'
 
 const scrolled = ref(false)
 const menuOpen = ref(false)
 const activeId = ref('')
+const isMounted = ref(false)
 const progress = useScrollProgress()
 
 let sectionObserver = null
@@ -29,6 +31,7 @@ watch(menuOpen, (open) => {
 })
 
 onMounted(() => {
+  isMounted.value = true
   onScroll()
   window.addEventListener('scroll', onScroll, { passive: true })
   window.addEventListener('keydown', onKeydown)
@@ -91,7 +94,7 @@ onBeforeUnmount(() => {
             class="appearance-none rounded-full border border-paper/12 bg-ink-950 py-2 pr-8 pl-3 font-display text-[0.72rem] font-semibold tracking-widest uppercase text-paper outline-none transition-colors duration-250 hover:border-paper/30"
             :value="lang"
             :aria-label="t.a11y.langLabel"
-            @change="setLang($event.target.value)"
+            @change="navigateToLocale($event.target.value)"
           >
             <option v-for="language in LANGUAGES" :key="language.code" :value="language.code">
               {{ language.short }}
@@ -103,6 +106,16 @@ onBeforeUnmount(() => {
         <a href="#contact" class="btn btn-primary hidden px-5! py-2.5! md:inline-flex">
           {{ t.nav.cta }}
         </a>
+
+        <button
+          v-if="isMounted"
+          type="button"
+          class="grid size-10 place-items-center rounded-full border border-paper/12 text-paper transition-colors duration-250 hover:border-paper/30"
+          :aria-label="theme === 'dark' ? t.a11y.themeToLight : t.a11y.themeToDark"
+          @click="toggleTheme"
+        >
+          <UiIcon :name="theme === 'dark' ? 'sun' : 'moon'" class="size-4.5" />
+        </button>
 
         <!-- Mobile menu button -->
         <button
@@ -134,9 +147,9 @@ onBeforeUnmount(() => {
       aria-hidden="true"
     />
 
-    <!-- Mobile overlay (teleported: header's backdrop-filter would
-         otherwise become its containing block and collapse it) -->
-    <Teleport to="body">
+    <!-- Mobile overlay is rendered into a dedicated body-level target so the
+         header's backdrop-filter cannot become its containing block. -->
+    <Teleport to="#teleports">
       <Transition name="menu">
         <div
           v-if="menuOpen"
