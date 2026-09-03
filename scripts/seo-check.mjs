@@ -47,7 +47,7 @@ for (const locale of localeCodes) {
   const name = locale.toUpperCase()
   const dictionary = getDictionary(locale)
   const canonical = localeUrl(locale)
-  const expectedFavicon = locale === 'cs' ? './favicon.svg' : '../favicon.svg'
+  const expectedPublicPrefix = locale === 'cs' ? './' : '../'
   const expectedAssetPrefix = locale === 'cs' ? './assets/' : '../assets/'
   const expectedBrandPrefix = locale === 'cs' ? './brands/' : '../brands/'
 
@@ -87,8 +87,31 @@ for (const locale of localeCodes) {
   const defaultLink = alternateLinks.find((tag) => getAttribute(tag, 'hreflang') === 'x-default')
   if (getAttribute(defaultLink ?? '', 'href') !== localeUrl('cs')) fail(`${name}: invalid x-default hreflang`)
 
-  if (getAttribute(links.find((tag) => getAttribute(tag, 'rel') === 'icon') ?? '', 'href') !== expectedFavicon) {
-    fail(`${name}: invalid relative favicon URL`)
+  const expectedIcons = [
+    { href: `${expectedPublicPrefix}favicon.svg`, type: 'image/svg+xml', sizes: null },
+    { href: `${expectedPublicPrefix}favicon-96x96.png`, type: 'image/png', sizes: '96x96' },
+    { href: `${expectedPublicPrefix}favicon.ico`, type: 'image/x-icon', sizes: 'any' },
+  ]
+  for (const expectedIcon of expectedIcons) {
+    const icon = links.find(
+      (tag) =>
+        getAttribute(tag, 'rel') === 'icon' &&
+        getAttribute(tag, 'href') === expectedIcon.href &&
+        getAttribute(tag, 'type') === expectedIcon.type &&
+        getAttribute(tag, 'sizes') === expectedIcon.sizes,
+    )
+    if (!icon) fail(`${name}: missing favicon ${expectedIcon.href}`)
+  }
+  const appleTouchIcon = links.find((tag) => getAttribute(tag, 'rel') === 'apple-touch-icon')
+  if (
+    getAttribute(appleTouchIcon ?? '', 'href') !== `${expectedPublicPrefix}apple-touch-icon.png` ||
+    getAttribute(appleTouchIcon ?? '', 'sizes') !== '180x180'
+  ) {
+    fail(`${name}: invalid apple touch icon URL`)
+  }
+  const manifest = links.find((tag) => getAttribute(tag, 'rel') === 'manifest')
+  if (getAttribute(manifest ?? '', 'href') !== `${expectedPublicPrefix}site.webmanifest`) {
+    fail(`${name}: invalid web app manifest URL`)
   }
 
   if (metaContent(html, 'property', 'og:title') !== dictionary.meta.title) fail(`${name}: missing localized og:title`)
@@ -137,7 +160,7 @@ for (const locale of localeCodes) {
     fail(`${name}: client asset URLs do not use ${expectedAssetPrefix}`)
   }
   if (!html.includes(`src="${expectedBrandPrefix}`)) fail(`${name}: brand asset URLs do not use ${expectedBrandPrefix}`)
-  if (locale !== 'cs' && (html.includes('src="./assets/') || html.includes('href="./assets/') || html.includes('src="./brands/') || html.includes('href="./favicon.svg"'))) {
+  if (locale !== 'cs' && (html.includes('src="./assets/') || html.includes('href="./assets/') || html.includes('src="./brands/') || html.includes('href="./favicon.svg"') || html.includes('href="./favicon-96x96.png"') || html.includes('href="./favicon.ico"') || html.includes('href="./apple-touch-icon.png"') || html.includes('href="./site.webmanifest"'))) {
     fail(`${name}: nested page contains root-only relative asset URL`)
   }
 }
@@ -161,6 +184,49 @@ if (!existsSync(ogPath)) {
   const og = readFileSync(ogPath)
   if (og.length < 24 || og.readUInt32BE(16) !== 1200 || og.readUInt32BE(20) !== 630) {
     fail('dist/og.png must be a 1200×630 PNG')
+  }
+}
+
+const faviconFiles = [
+  ['favicon.ico'],
+  ['favicon.svg'],
+  ['favicon-96x96.png', 96, 96],
+  ['apple-touch-icon.png', 180, 180],
+  ['web-app-manifest-192x192.png', 192, 192],
+  ['web-app-manifest-512x512.png', 512, 512],
+]
+for (const [file, width, height] of faviconFiles) {
+  const filePath = resolve(dist, file)
+  if (!existsSync(filePath)) {
+    fail(`Missing dist/${file}`)
+    continue
+  }
+  if (width && height) {
+    const image = readFileSync(filePath)
+    if (image.length < 24 || image.readUInt32BE(16) !== width || image.readUInt32BE(20) !== height) {
+      fail(`dist/${file} must be a ${width}×${height} PNG`)
+    }
+  }
+}
+
+const manifestPath = resolve(dist, 'site.webmanifest')
+if (!existsSync(manifestPath)) {
+  fail('Missing dist/site.webmanifest')
+} else {
+  try {
+    const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'))
+    const icons = manifest.icons ?? []
+    if (
+      manifest.name !== 'VOPH Partners' ||
+      manifest.short_name !== 'VOPH' ||
+      manifest.display !== 'standalone' ||
+      !icons.some((icon) => icon.src === './web-app-manifest-192x192.png' && icon.sizes === '192x192' && icon.type === 'image/png') ||
+      !icons.some((icon) => icon.src === './web-app-manifest-512x512.png' && icon.sizes === '512x512' && icon.type === 'image/png')
+    ) {
+      fail('dist/site.webmanifest has invalid VOPH icon configuration')
+    }
+  } catch {
+    fail('dist/site.webmanifest is not valid JSON')
   }
 }
 
