@@ -33,8 +33,8 @@ const html = `<!doctype html><html><head><style>
       <div class="sq"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#0a0908" stroke-width="3"><path d="M5.5 5.5 12 19l6.5-13.5"/></svg></div>
       <div class="logo">VOPH<span>Partners</span></div>
     </div>
-    <h1>FMCG trading<br/>&amp; sourcing<i>.</i></h1>
-    <div class="sub">Global brands. Competitive prices. Long-term partnerships.</div>
+    <h1>FMCG Czech<br/>Republic<i>.</i></h1>
+    <div class="sub">Trading · sourcing · distribution across Europe.</div>
   </div>
 </body></html>`
 
