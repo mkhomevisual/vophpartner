@@ -183,6 +183,24 @@ for (const locale of localeCodes) {
   }
   if (html.includes('<!--ssg:app-->') || html.includes('<!--ssg:seo:')) fail(`${name}: prerender placeholder remains`)
 
+  const crawlableLocaleLinks = tags(html, 'a').filter((tag) => getAttribute(tag, 'data-locale'))
+  if (crawlableLocaleLinks.length !== localeCodes.length) {
+    fail(`${name}: expected ${localeCodes.length} crawlable locale links, found ${crawlableLocaleLinks.length}`)
+  }
+  for (const target of localeCodes) {
+    const expectedHref = locale === 'cs'
+      ? target === 'cs' ? './' : `./${target}/`
+      : target === 'cs' ? '../' : `../${target}/`
+    const localeLink = crawlableLocaleLinks.find((tag) => getAttribute(tag, 'data-locale') === target)
+    if (
+      !localeLink ||
+      getAttribute(localeLink, 'href') !== expectedHref ||
+      getAttribute(localeLink, 'hreflang') !== target
+    ) {
+      fail(`${name}: locale ${target} is missing a crawlable, language-labelled link`)
+    }
+  }
+
   if (['cs', 'en'].includes(locale)) {
     if (!title.includes(primaryKeyword)) fail(`${name}: title is missing the primary keyword`)
     if (!description.includes(primaryKeyword)) fail(`${name}: meta description is missing the primary keyword`)

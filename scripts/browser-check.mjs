@@ -52,6 +52,11 @@ const openLocale = async (locale, options = {}) => {
     dark: document.documentElement.classList.contains('dark'),
     storedTheme: localStorage.getItem('voph-theme'),
     themeControl: [...document.querySelectorAll('button')].some((button) => /dark|light|tmav|světl|tryb|modus/i.test(button.getAttribute('aria-label') ?? '')),
+    localeLinks: [...document.querySelectorAll('a[data-locale]')].map((link) => ({
+      locale: link.dataset.locale,
+      href: link.getAttribute('href'),
+      hreflang: link.getAttribute('hreflang'),
+    })),
   }))
   assert(result.lang === locale, `${locale}: URL did not control html lang`)
   assert(result.title === expected.meta.title, `${locale}: incorrect localized title after hydration`)
@@ -60,6 +65,11 @@ const openLocale = async (locale, options = {}) => {
   assert(result.reveals > 0, `${locale}: reveal interactions did not initialize`)
   assert(result.widthFits, `${locale}: horizontal overflow at ${options.viewport?.width ?? 1280}px`)
   assert(!result.dark && result.storedTheme === null && !result.themeControl, `${locale}: the light-only theme must not expose a theme switch`)
+  assert(result.localeLinks.length === LANGUAGES.length, `${locale}: language menu must contain crawlable links for every locale`)
+  for (const language of LANGUAGES) {
+    const link = result.localeLinks.find(({ locale: linkLocale }) => linkLocale === language.code)
+    assert(link?.href && link.hreflang === language.code, `${locale}: missing crawlable ${language.code} locale link`)
+  }
 
   const refreshed = await page.reload({ waitUntil: 'domcontentloaded' })
   assert(refreshed?.status() === 200, `${locale}: refresh did not return HTTP 200`)
@@ -123,14 +133,26 @@ try {
   const interactionPage = await interactionContext.newPage()
   attachErrorTracking(interactionPage)
   await interactionPage.goto(`${baseUrl}/en/#services`, { waitUntil: 'domcontentloaded' })
-  await interactionPage.locator('select').selectOption('de')
+  await interactionPage.locator('summary').click()
+  await interactionPage.locator('a[data-locale="de"]').click()
   await interactionPage.waitForURL(/\/de\/#services$/)
-  assert(await interactionPage.locator('html').getAttribute('lang') === 'de', 'Language selector did not navigate to /de/#services')
+  assert(await interactionPage.locator('html').getAttribute('lang') === 'de', 'Language menu did not navigate to /de/#services')
 
   await interactionPage.goto(`${baseUrl}/`, { waitUntil: 'domcontentloaded' })
   await interactionPage.locator('a[href="#about"]').first().click()
   await interactionPage.waitForFunction(() => window.location.hash === '#about')
   await interactionContext.close()
+
+  const noScriptContext = await browser.newContext({ javaScriptEnabled: false })
+  const noScriptPage = await noScriptContext.newPage()
+  const noScriptResponse = await noScriptPage.goto(`${baseUrl}/`, { waitUntil: 'domcontentloaded' })
+  assert(noScriptResponse?.status() === 200, 'No-script locale test did not load the Czech page')
+  assert(await noScriptPage.locator('a[data-locale]').count() === LANGUAGES.length, 'Locale links are not present without JavaScript')
+  await noScriptPage.locator('summary').click()
+  await noScriptPage.locator('a[data-locale="en"]').click()
+  await noScriptPage.waitForURL(/\/en\/$/)
+  assert(await noScriptPage.locator('html').getAttribute('lang') === 'en', 'Locale link did not work without JavaScript')
+  await noScriptContext.close()
 
   const mobileMenuContext = await browser.newContext({ viewport: { width: 360, height: 780 } })
   const mobileMenuPage = await mobileMenuContext.newPage()
@@ -153,7 +175,7 @@ try {
   await reducedMotionContext.close()
 
   if (browserErrors.length) throw new Error(browserErrors.join('\n'))
-  console.log(`Browser check passed for ${LANGUAGES.length} locale URLs, localized 404 pages, selector, light-only theme, hash navigation and reduced motion.`)
+  console.log(`Browser check passed for ${LANGUAGES.length} locale URLs, localized 404 pages, crawlable language menu, light-only theme, hash navigation and reduced motion.`)
 } finally {
   await browser.close()
 }
