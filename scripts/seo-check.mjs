@@ -9,6 +9,8 @@ const dist = resolve(root, 'dist')
 const localeCodes = LANGUAGES.map(({ code }) => code)
 const failures = []
 const ogLocales = { cs: 'cs_CZ', en: 'en_US', pl: 'pl_PL', de: 'de_DE', hu: 'hu_HU', fr: 'fr_FR', nl: 'nl_NL' }
+const schemaLanguages = { cs: 'cs-CZ', en: 'en', pl: 'pl', de: 'de', hu: 'hu', fr: 'fr', nl: 'nl' }
+const primaryKeyword = 'FMCG Czech Republic'
 
 const fail = (message) => failures.push(message)
 const requireFile = (path) => {
@@ -61,9 +63,13 @@ for (const locale of localeCodes) {
   const description = metaContent(html, 'name', 'description')
   if (description !== dictionary.meta.description) fail(`${name}: incorrect or missing meta description`)
 
-  if (metaContent(html, 'name', 'robots') !== 'index, follow') fail(`${name}: robots must be index, follow`)
+  const robotsContent = metaContent(html, 'name', 'robots') ?? ''
+  if (!robotsContent.includes('index') || !robotsContent.includes('follow') || !robotsContent.includes('max-image-preview:large')) {
+    fail(`${name}: robots must allow indexing and large previews`)
+  }
   if (/\bnoindex\b/i.test(html)) fail(`${name}: contains noindex`)
   if (/<meta\b[^>]*\bname=["']keywords["']/i.test(html)) fail(`${name}: must not use meta keywords`)
+  if (metaContent(html, 'name', 'author') !== 'VOPH Partners') fail(`${name}: missing author metadata`)
 
   const links = tags(html, 'link')
   const canonicalLinks = links.filter((tag) => getAttribute(tag, 'rel') === 'canonical')
@@ -120,6 +126,8 @@ for (const locale of localeCodes) {
   if (metaContent(html, 'property', 'og:url') !== canonical) fail(`${name}: incorrect og:url`)
   if (metaContent(html, 'property', 'og:locale') !== ogLocales[locale]) fail(`${name}: incorrect og:locale`)
   if (metaContent(html, 'property', 'og:image') !== `${SITE_ORIGIN}/og.png`) fail(`${name}: og:image must be absolute`)
+  if (metaContent(html, 'property', 'og:image:alt') !== 'VOPH Partners — FMCG Czech Republic') fail(`${name}: missing og:image:alt`)
+  if (metaContent(html, 'property', 'og:image:type') !== 'image/png') fail(`${name}: incorrect og:image:type`)
   if (metaContent(html, 'property', 'og:image:width') !== '1200' || metaContent(html, 'property', 'og:image:height') !== '630') {
     fail(`${name}: incorrect Open Graph image dimensions`)
   }
@@ -127,8 +135,9 @@ for (const locale of localeCodes) {
   if (metaContent(html, 'name', 'twitter:title') !== dictionary.meta.title) fail(`${name}: missing localized twitter:title`)
   if (metaContent(html, 'name', 'twitter:description') !== dictionary.meta.description) fail(`${name}: missing localized twitter:description`)
   if (metaContent(html, 'name', 'twitter:image') !== `${SITE_ORIGIN}/og.png`) fail(`${name}: twitter:image must be absolute`)
+  if (metaContent(html, 'name', 'twitter:image:alt') !== 'VOPH Partners — FMCG Czech Republic') fail(`${name}: missing twitter:image:alt`)
 
-  const jsonLd = [...html.matchAll(/<script\b[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)]
+  const jsonLdBlocks = [...html.matchAll(/<script\b[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)]
     .map(([, value]) => {
       try {
         return JSON.parse(value)
@@ -137,9 +146,26 @@ for (const locale of localeCodes) {
         return null
       }
     })
-    .find((value) => value?.['@type'] === 'Organization')
-  if (!jsonLd || jsonLd.name !== 'VOPH Partners' || jsonLd.url !== localeUrl('cs') || jsonLd.email !== 'info@voph.cz' || jsonLd.telephone !== '+420 775 372 979') {
+    .filter(Boolean)
+  const jsonLdGraph = jsonLdBlocks.flatMap((value) => value?.['@graph'] ?? [value])
+  const organization = jsonLdGraph.find((value) => value?.['@type'] === 'Organization')
+  const website = jsonLdGraph.find((value) => value?.['@type'] === 'WebSite')
+  const webpage = jsonLdGraph.find((value) => value?.['@type'] === 'WebPage')
+  const service = jsonLdGraph.find((value) => value?.['@type'] === 'Service')
+  if (!organization || organization.name !== 'VOPH Partners' || organization.url !== localeUrl('cs') || organization.email !== 'info@voph.cz' || organization.telephone !== '+420 775 372 979') {
     fail(`${name}: missing or incorrect Organization JSON-LD`)
+  }
+  if (!organization?.knowsAbout?.includes(primaryKeyword) || !organization?.areaServed?.some(({ name: areaName }) => areaName === 'Czech Republic')) {
+    fail(`${name}: Organization JSON-LD is missing Czech FMCG relevance`)
+  }
+  if (!website || website.url !== localeUrl('cs') || website.publisher?.['@id'] !== `${SITE_ORIGIN}/#organization`) {
+    fail(`${name}: missing or incorrect WebSite JSON-LD`)
+  }
+  if (!webpage || webpage.url !== canonical || webpage.name !== dictionary.meta.title || webpage.inLanguage !== schemaLanguages[locale]) {
+    fail(`${name}: missing or incorrect WebPage JSON-LD`)
+  }
+  if (!service || !service.serviceType?.includes('FMCG trading') || service.provider?.['@id'] !== `${SITE_ORIGIN}/#organization`) {
+    fail(`${name}: missing or incorrect Service JSON-LD`)
   }
 
   const h1s = [...html.matchAll(/<h1\b[^>]*>([\s\S]*?)<\/h1>/gi)]
@@ -156,6 +182,13 @@ for (const locale of localeCodes) {
     fail(`${name}: app shell is not prerendered`)
   }
   if (html.includes('<!--ssg:app-->') || html.includes('<!--ssg:seo:')) fail(`${name}: prerender placeholder remains`)
+
+  if (['cs', 'en'].includes(locale)) {
+    if (!title.includes(primaryKeyword)) fail(`${name}: title is missing the primary keyword`)
+    if (!description.includes(primaryKeyword)) fail(`${name}: meta description is missing the primary keyword`)
+    if (!h1Text.includes(primaryKeyword)) fail(`${name}: H1 is missing the primary keyword`)
+    if (!stripTags(html).includes(primaryKeyword)) fail(`${name}: visible copy is missing the primary keyword`)
+  }
 
   if (!html.includes(`src="${expectedAssetPrefix}`) || !html.includes(`href="${expectedAssetPrefix}`)) {
     fail(`${name}: client asset URLs do not use ${expectedAssetPrefix}`)
@@ -193,7 +226,12 @@ if (sitemap) {
   for (const locale of localeCodes) {
     if (!sitemap.includes(`<loc>${localeUrl(locale)}</loc>`)) fail(`sitemap.xml is missing ${localeUrl(locale)}`)
   }
+  const lastmodMatches = [...sitemap.matchAll(/<lastmod>(\d{4}-\d{2}-\d{2})<\/lastmod>/g)]
+  if (lastmodMatches.length !== localeCodes.length) fail('sitemap.xml must include one valid lastmod per locale URL')
 }
+
+const cname = requireFile(resolve(dist, 'CNAME'))
+if (cname?.trim() !== new URL(SITE_ORIGIN).hostname) fail('CNAME does not match the canonical hostname')
 
 for (const locale of localeCodes) {
   const notFoundPath = resolve(dist, locale === 'cs' ? '404.html' : locale, locale === 'cs' ? '' : '404.html')
